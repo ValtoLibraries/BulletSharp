@@ -32,6 +32,11 @@ btCollisionObject* btAlignedObjectArray_btCollisionObjectPtr_at(btAlignedObjectA
 	return obj->at(n);
 }
 
+int btAlignedObjectArray_btCollisionObjectPtr_findLinearSearch2(btAlignedObjectArray_btCollisionObjectPtr* obj, btCollisionObject* key)
+{
+	return obj->findLinearSearch2(key);
+}
+
 void btAlignedObjectArray_btCollisionObjectPtr_push_back(btAlignedObjectArray_btCollisionObjectPtr* obj, btCollisionObject* val)
 {
 	obj->push_back(val);
@@ -276,6 +281,17 @@ void btAlignedObjectArray_btSoftBody_Node_resizeNoInitialize(btAlignedObjectArra
 }
 
 int btAlignedObjectArray_btSoftBody_Node_size(btAlignedObjectArray_btSoftBody_Node* obj)
+{
+	return obj->size();
+}
+
+
+btSoftBody::Note* btAlignedObjectArray_btSoftBody_Note_at(btAlignedObjectArray_btSoftBody_Note* obj, int n)
+{
+	return &obj->at(n);
+}
+
+int btAlignedObjectArray_btSoftBody_Note_size(btAlignedObjectArray_btSoftBody_Note* obj)
 {
 	return obj->size();
 }

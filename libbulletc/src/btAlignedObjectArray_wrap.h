@@ -9,6 +9,7 @@ extern "C" {
 	EXPORT int btAlignedObjectArray_btBroadphasePair_size(btAlignedObjectArray_btBroadphasePair* obj);
 
 	EXPORT btCollisionObject* btAlignedObjectArray_btCollisionObjectPtr_at(btAlignedObjectArray_btCollisionObjectPtr* obj, int n);
+	EXPORT int btAlignedObjectArray_btCollisionObjectPtr_findLinearSearch2(btAlignedObjectArray_btCollisionObjectPtr* obj, btCollisionObject* key);
 	EXPORT void btAlignedObjectArray_btCollisionObjectPtr_push_back(btAlignedObjectArray_btCollisionObjectPtr* obj, btCollisionObject* val);
 	EXPORT void btAlignedObjectArray_btCollisionObjectPtr_resizeNoInitialize(btAlignedObjectArray_btCollisionObjectPtr* obj, int newSize);
 	EXPORT int btAlignedObjectArray_btCollisionObjectPtr_size(btAlignedObjectArray_btCollisionObjectPtr* obj);
@@ -66,6 +67,9 @@ extern "C" {
 	EXPORT void btAlignedObjectArray_btSoftBody_Node_push_back(btAlignedObjectArray_btSoftBody_Node* obj, btSoftBody_Node* val);
 	EXPORT void btAlignedObjectArray_btSoftBody_Node_resizeNoInitialize(btAlignedObjectArray_btSoftBody_Node* obj, int newSize);
 	EXPORT int btAlignedObjectArray_btSoftBody_Node_size(btAlignedObjectArray_btSoftBody_Node* obj);
+
+	EXPORT btSoftBody_Note* btAlignedObjectArray_btSoftBody_Note_at(btAlignedObjectArray_btSoftBody_Note* obj, int n);
+	EXPORT int btAlignedObjectArray_btSoftBody_Note_size(btAlignedObjectArray_btSoftBody_Note* obj);
 
 	EXPORT btSoftBody_Tetra* btAlignedObjectArray_btSoftBody_Tetra_at(btAlignedObjectArray_btSoftBody_Tetra* obj, int n);
 	EXPORT void btAlignedObjectArray_btSoftBody_Tetra_push_back(btAlignedObjectArray_btSoftBody_Tetra* obj, btSoftBody_Tetra* val);
