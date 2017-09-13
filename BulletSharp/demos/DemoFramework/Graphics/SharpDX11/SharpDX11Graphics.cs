@@ -695,7 +695,7 @@ namespace DemoFramework.SharpDX11
 
         public override void Run()
         {
-            RenderLoop.Run(Form, (RenderLoop.RenderCallback)(() =>
+            RenderLoop.Run(Form, () =>
             {
                 Demo.OnUpdate();
                 if (Form.WindowState == FormWindowState.Minimized)
@@ -703,7 +703,7 @@ namespace DemoFramework.SharpDX11
                 Demo.Clock.StartRender();
                 Render();
                 Demo.Clock.StopRender();
-            }));
+            });
         }
 
         protected virtual void OnInitialize()
@@ -726,7 +726,7 @@ namespace DemoFramework.SharpDX11
             }
             RenderOverlay();
 
-            _swapChain.Present(0, PresentFlags.None);
+            _swapChain.Present(1, PresentFlags.None);
         }
 
         private void ClearTargets()

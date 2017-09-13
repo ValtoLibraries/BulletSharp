@@ -67,12 +67,44 @@ namespace DemoFramework
                 case BroadphaseNativeType.TriangleMeshShape:
                     indices = null;
                     return CreateTriangleMesh((shape as TriangleMeshShape).MeshInterface);
+                case BroadphaseNativeType.UniformScalingShape:
+                    indices = null;
+                    return CreateUniformScalingShape(shape as UniformScalingShape, out indices);
+                case BroadphaseNativeType.ScaledTriangleMeshShape:
+                    indices = null;
+                    return CreateScaledBvhTriangleMeshShape(shape as ScaledBvhTriangleMeshShape, out indices);
+
             }
             if (shape is PolyhedralConvexShape)
             {
                 return CreatePolyhedralConvexShape((shape as PolyhedralConvexShape), out indices);
             }
             throw new NotImplementedException();
+        }
+
+        public static Vector3[] CreateScaledBvhTriangleMeshShape(ScaledBvhTriangleMeshShape shape, out uint[] indices)
+        {
+            Vector3[] vert = CreateShape(shape.ChildShape, out indices);
+            var scale = shape.LocalScaling;
+
+            return ScaleShape(vert, ref scale);
+        }
+
+        public static Vector3[] CreateUniformScalingShape(UniformScalingShape shape, out uint[] indices)
+        {
+            Vector3[] vert = CreateShape(shape.ChildShape, out indices);
+            var scale = new Vector3(shape.UniformScalingFactor);
+
+            return ScaleShape(vert, ref scale);
+        }
+
+        public static Vector3[] ScaleShape(Vector3[] shape, ref Vector3 scaling)
+        {
+            for (int i = 0; i < shape.Length; i++)
+            {
+                shape[i] *= scaling;
+            }
+            return shape;
         }
 
         public static ushort[] CompactIndexBuffer(uint[] indices)
@@ -790,12 +822,14 @@ namespace DemoFramework
                     Vector3 normal = Vector3.Cross(v01, v02);
                     normal.Normalize();
 
-                    vertices[v++] = v0;
-                    vertices[v++] = normal;
-                    vertices[v++] = v1;
-                    vertices[v++] = normal;
-                    vertices[v++] = v2;
-                    vertices[v++] = normal;
+                    var scaling = meshInterface.Scaling;
+
+                    vertices[v++] = v0 * scaling;
+                    vertices[v++] = normal * scaling;
+                    vertices[v++] = v1 * scaling;
+                    vertices[v++] = normal * scaling;
+                    vertices[v++] = v2 * scaling;
+                    vertices[v++] = normal * scaling;
 
                     indexStream.Position += triangleStrideDelta;
                 }

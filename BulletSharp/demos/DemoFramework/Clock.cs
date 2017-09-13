@@ -4,18 +4,19 @@ namespace DemoFramework
 {
     public class Clock
     {
-        Stopwatch _physicsTimer = new Stopwatch();
-        Stopwatch _renderTimer = new Stopwatch();
-        Stopwatch _frameTimer = new Stopwatch();
+        private Stopwatch _physicsTimer = new Stopwatch();
+        private Stopwatch _renderTimer = new Stopwatch();
+        private Stopwatch _frameTimer = new Stopwatch();
 
         public long FrameCount { get; private set; }
+        public long SubStepCount { get; private set; }
 
         public float PhysicsAverage
         {
             get
             {
                 if (FrameCount == 0) return 0;
-                return (((float)_physicsTimer.ElapsedTicks / Stopwatch.Frequency) / FrameCount) * 1000.0f;
+                return (((float)_physicsTimer.ElapsedTicks / Stopwatch.Frequency) / SubStepCount) * 1000.0f;
             }
         }
 
@@ -33,9 +34,10 @@ namespace DemoFramework
             _physicsTimer.Start();
         }
 
-        public void StopPhysics()
+        public void StopPhysics(int substepsPassed)
         {
             _physicsTimer.Stop();
+            SubStepCount += substepsPassed;
         }
 
         public void StartRender()
@@ -59,8 +61,10 @@ namespace DemoFramework
 
         public void Reset()
         {
-            FrameCount = 0;
+            SubStepCount = 0;
             _physicsTimer.Reset();
+
+            FrameCount = 0;
             _renderTimer.Reset();
         }
     }
