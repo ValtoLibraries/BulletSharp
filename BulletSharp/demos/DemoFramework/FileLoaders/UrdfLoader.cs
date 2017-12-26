@@ -23,8 +23,14 @@ namespace DemoFramework.FileLoaders
 
             foreach (XmlElement linkElement in element.SelectNodes("link"))
             {
-                var link = ParseLink(linkElement);
-                robot.Links.Add(link);
+                UrdfLink link = ParseLink(linkElement);
+                robot.Links[link.Name] = link;
+            }
+
+            foreach (XmlElement jointElement in element.SelectNodes("joint"))
+            {
+                UrdfJoint joint = ParseJoint(jointElement, robot);
+                robot.Joints.Add(joint);
             }
 
             return robot;
@@ -72,13 +78,23 @@ namespace DemoFramework.FileLoaders
 
         private static UrdfGeometry ParseGeometry(XmlElement element)
         {
-            var shapeElement = element.SelectSingleNode("box|cylinder|mesh|sphere");
+            var shapeElement = element.SelectSingleNode("box|capsule|cylinder|mesh|sphere");
             switch (shapeElement.Name)
             {
                 case "box":
                     return new UrdfBox
                     {
                         Size = shapeElement.Attributes["size"].Value
+                    };
+                case "capsule":
+                    return new UrdfCapsule
+                    {
+                        Radius = double.Parse(
+                            shapeElement.Attributes["radius"].Value,
+                            CultureInfo.InvariantCulture),
+                        Length = double.Parse(
+                            shapeElement.Attributes["length"].Value,
+                            CultureInfo.InvariantCulture)
                     };
                 case "cylinder":
                     return new UrdfCylinder
@@ -107,6 +123,41 @@ namespace DemoFramework.FileLoaders
             throw new NotSupportedException();
         }
 
+        private static UrdfJoint ParseJoint(XmlElement jointElement, UrdfRobot robot)
+        {
+            XmlNode parentNode = jointElement.SelectSingleNode("parent");
+            XmlNode childNode = jointElement.SelectSingleNode("child");
+
+            string parentId = parentNode.Attributes["link"].Value;
+            string childId = childNode.Attributes["link"].Value;
+
+            UrdfJoint joint;
+
+            string type = jointElement.GetAttribute("type");
+            switch (type)
+            {
+                case "continuous":
+                    joint = new UrdfContinuousJoint();
+                    break;
+                case "prismatic":
+                    joint = new UrdfPrismaticJoint();
+                    break;
+                case "fixed":
+                    joint = new UrdfFixedJoint();
+                    break;
+                case "revolute":
+                    joint = new UrdfRevoluteJoint();
+                    break;
+                default:
+                    throw new NotSupportedException();
+            }
+
+            joint.Parent = robot.Links[parentId];
+            joint.Child = robot.Links[childId];
+
+            return joint;
+        }
+
         private static UrdfPose ParseOrigin(XmlElement element)
         {
             if (element == null)
@@ -115,8 +166,8 @@ namespace DemoFramework.FileLoaders
             }
             return new UrdfPose
             {
-                Position = element.Attributes["xyz"].Value,
-                RollPitchYaw = element.Attributes["rpy"].Value
+                Position = element.Attributes["xyz"]?.Value,
+                RollPitchYaw = element.Attributes["rpy"]?.Value
             };
         }
     }
@@ -124,7 +175,8 @@ namespace DemoFramework.FileLoaders
     public class UrdfRobot
     {
         public string Name { get; set; }
-        public List<UrdfLink> Links { get; } = new List<UrdfLink>();
+        public IDictionary<string, UrdfLink> Links { get; } = new Dictionary<string, UrdfLink>();
+        public List<UrdfJoint> Joints { get; } = new List<UrdfJoint>();
 
         public override string ToString()
         {
@@ -158,6 +210,7 @@ namespace DemoFramework.FileLoaders
     public enum UrdfGeometryType
     {
         Box,
+        Capsule,
         Cylinder,
         Mesh,
         Sphere
@@ -173,6 +226,14 @@ namespace DemoFramework.FileLoaders
         public override UrdfGeometryType Type => UrdfGeometryType.Box;
 
         public string Size { get; set; }
+    }
+
+    public class UrdfCapsule : UrdfGeometry
+    {
+        public override UrdfGeometryType Type => UrdfGeometryType.Capsule;
+
+        public double Length { get; set; }
+        public double Radius { get; set; }
     }
 
     public class UrdfCylinder : UrdfGeometry
@@ -196,6 +257,47 @@ namespace DemoFramework.FileLoaders
         public override UrdfGeometryType Type => UrdfGeometryType.Sphere;
 
         public double Radius { get; set; }
+    }
+
+    public enum UrdfJointType
+    {
+        Continuous,
+        Prismatic,
+        Fixed,
+        Revolute
+    }
+
+    public abstract class UrdfJoint
+    {
+        public abstract UrdfJointType Type { get; }
+
+        public UrdfLink Parent { get; set; }
+        public UrdfLink Child { get; set; }
+
+        public override string ToString()
+        {
+            return $"{Child} -> {Parent}";
+        }
+    }
+
+    public class UrdfContinuousJoint : UrdfJoint
+    {
+        public override UrdfJointType Type => UrdfJointType.Continuous;
+    }
+
+    public class UrdfPrismaticJoint : UrdfJoint
+    {
+        public override UrdfJointType Type => UrdfJointType.Prismatic;
+    }
+
+    public class UrdfFixedJoint : UrdfJoint
+    {
+        public override UrdfJointType Type => UrdfJointType.Fixed;
+    }
+
+    public class UrdfRevoluteJoint : UrdfJoint
+    {
+        public override UrdfJointType Type => UrdfJointType.Revolute;
     }
 
     public class UrdfPose
